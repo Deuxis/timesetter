@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<script async defer type="text/javascript" src="dxts.js"></script>
+	<style type="text/css">
+	.dxts_uplabel {
+		grid-row: 1;
+	}
+	.dxts_leftlabel {
+		grid-column: 1;
+	}
+
+	#dxts_gridwrapper {
+		display: grid;
+		/* Width and height are adjusted to be the canvas's plus the labels, this way labels can be styled using fraction units, aligning perfectly to the grid drawn on the canvas. */
+		width: 47.75em;
+		height: 31.25em;
+		grid-gap: 1px;
+		grid-template-columns: 4em;
+		grid-auto-columns: 1fr;
+		grid-auto-rows: 1fr;
+		background-color: black;
+	}
+	#dxts_gridwrapper * {
+		background-color: white;
+	}
+	#dxts_gridwrapper p {
+		max-width: 1fr;
+		margin: 0;
+		text-align: center;
+	}
+	#dxts_canvas {
+		display: block;
+		/* Width and height are em conversions of the canvas's initial rendering dimensions. This way the canvas will have native resolution in normal environments, and will scale gracefully in others. */
+		width: 43.75em;
+		height: 30em;
+		grid-column: 2 / 8;
+		grid-row: 2 / 25;
+		background-color: white;
+	}
+	</style>
+</head>
+<body>
+	<input id="dxts_stringfield" type="text" />
+	<input id="dxts_clearbtn" type="button" value="Clear"/>
+	<input id="dxts_247btn" type="button" value="24/7"/>
+	<div id="dxts_gridwrapper">
+		<div id="dxts_placeholder" class="dxts_uplabel dxts_leftlabel">
+			<!-- This is a placeholder -->
+		</div>
+		<canvas id="dxts_canvas" width="700" height="480"></canvas>
+	</div>
+</body>
+</html>
