@@ -4,149 +4,156 @@
 	// TODO: Translations
 	let days = [
 	{
-		enname: "Monday",
-		code: "Mo"
+		code: "Mo",
+		enname: "Monday"
 	},
 	{
-		enname: "Tuesday",
-		code: "Tu"
+		code: "Tu",
+		enname: "Tuesday"
 	},
 	{
-		enname: "Wednesday",
-		code: "We"
+		code: "We",
+		enname: "Wednesday"
 	},
 	{
-		enname: "Thursday",
-		code: "Th"
+		code: "Th",
+		enname: "Thursday"
 	},
 	{
-		enname: "Friday",
-		code: "Fr"
+		code: "Fr",
+		enname: "Friday"
 	},
 	{
-		enname: "Saturday",
-		code: "Sa"
+		code: "Sa",
+		enname: "Saturday"
 	},
 	{
-		enname: "Sunday",
-		code: "Su"
+		code: "Su",
+		enname: "Sunday"
 	}];
-	let canvas, stringfield, ctx, colwidth, colheight, rowwidth, rowheight, row2height, quadheight;
+	let constructed, ctx, colwidth, colheight, rowwidth, rowheight, quadheight;
 	let selections = [],
 		active_selection;
 
+	let elements = {
+		root: undefined,
+		canvas: undefined,
+		stringfield: undefined,
+		button_reset: undefined,
+		button_24: undefined,
+		table: undefined,
+		day_labels: [],
+		hour_labels: []
+	};
+
 	init();
 
-	function init()
+	/*
+	 *  This constructs the required DOM structure. bound_field is the text field (usually text input) where the generated string will go; if undefined we create our own field. root_element is the element inside which we create the structure; if undefined and bound_field is defined, it is set to bound_field's parent. If both are undefined, it's set to document.body.
+	 */
+	function construct(bound_field, root_element)
 	{
-		canvas = document.getElementById('dxts_canvas');
-		let stringcontainer = document.getElementById('dxts_stringfield');
-		stringfield = stringcontainer.appendChild(document.createTextNode(""));
-		doLabels();
-		// All those calculations are so that the canvas is divided into even portions. Its dimensions get corrected to be the correct multiple of column width or row height if needed.
-		colwidth = Math.floor(canvas.width / 7);
-		canvas.width = rowwidth = colwidth * 7;
-		rowheight = Math.floor(canvas.height / 24);
-		canvas.height = colheight = rowheight * 24;
-		row2height = rowheight * 2;
-		quadheight = rowheight / 4;
-		ctx = canvas.getContext('2d');
-		drawBaseNew();
-		canvas.addEventListener("pointerdown", pointerDown,
+		if (root_element)
+		{
+			elements.root = root_element;
+		}
+		else
+		{
+			elements.root = bound_field ? bound_field.parentNode : document.body.appendChild(document.createElement("div"));
+		}
+		elements.root.classList.add("dxts");
+		let domfragment = document.createDocumentFragment();
+		if (bound_field)
+		{
+			elements.stringfield = bound_field;
+		}
+		else
+		{
+			elements.stringfield = document.createElement("textarea");
+			domfragment.appendChild(elements.stringfield);
+		}
+		elements.button_reset = document.createElement("button");
+		elements.button_reset.appendChild(document.createTextNode("Reset"));
+		elements.button_reset.addEventListener("click", reset);
+		domfragment.appendChild(elements.button_reset);
+		elements.button_24 = document.createElement("button");
+		elements.button_24.appendChild(document.createTextNode("24/7"));
+		elements.button_24.addEventListener("click", set24);
+		domfragment.appendChild(elements.button_24);
+		elements.table = document.createElement("table");
+		domfragment.appendChild(elements.table);
+		let tbody = document.createElement("tbody");
+		elements.table.appendChild(tbody);
+		// I didn't come up with a more elegant solution to the "row" variable, so creating a separate scope so that it will die as soon as possible.
+		{
+			let placeholder = document.createElement("td");
+			let row = tbody.insertRow();
+			row.appendChild(placeholder);
+			for (let i = 0; i < 7; i++)
+			{
+				elements.day_labels[i] = row.insertCell();
+				elements.day_labels[i].classList.add("dxts-daylabel");
+				elements.day_labels[i].appendChild(document.createTextNode(days[i].enname));
+			}
+		}
+		for (var i = 0; i < 24; i++)
+		{
+			// We want strings like 01:00-02:00
+			let string = String(i).padStart(2, "0") + ":00-" + String(i + 1).padStart(2, "0") + ":00";
+			let row = tbody.insertRow();
+			elements.hour_labels[i] = row.insertCell();
+			elements.hour_labels[i].classList.add("dxts-hourlabel");
+			elements.hour_labels[i].appendChild(document.createTextNode(string));
+		}
+		// All labels set up, table of correct size. Now create and insert the canvas (into the first non-label row).
+		elements.canvas = document.createElement("canvas");
+		let canvascell = tbody.children[1].insertCell();
+		canvascell.setAttribute("colspan", "7");
+		canvascell.setAttribute("rowspan", "24");
+		canvascell.appendChild(elements.canvas);
+		ctx = elements.canvas.getContext('2d');
+		elements.canvas.addEventListener("pointerdown", pointerDown,
 		{
 			passive: false
 		});
-		canvas.addEventListener("pointerup", pointerUp,
+		elements.canvas.addEventListener("pointerup", pointerUp,
 		{
 			passive: true
 		});
+		elements.canvas.addEventListener("resize", resize,
+		{
+			passive: true
+		});
+		constructed = true;
+		elements.root.appendChild(domfragment);
+		resize();
 	}
 
-	function doLabels()
+	function resize()
 	{
-		let wrapper = document.getElementById("dxts_gridwrapper");
-		// Days
-		for (let day of days)
-		{
-			let label = document.createElement("p");
-			label.classList.add("dxts_uplabel");
-			label.appendChild(document.createTextNode(day.enname));
-			wrapper.appendChild(label);
-		}
-		// Hours
-		for (var i = 0; i < 24; i++)
-		{
-			let label = document.createElement("p");
-			label.classList.add("dxts_leftlabel");
-			label.appendChild(document.createTextNode(i));
-			wrapper.appendChild(label);
-		}
+		let canvas = elements.canvas;
+		canvas.width = canvas.clientWidth;
+		canvas.height = canvas.clientHeight;
+		colwidth = elements.day_labels[0].clientWidth;
+		colheight = canvas.height;
+		rowwidth = canvas.width;
+		rowheight = elements.hour_labels[0].clientHeight;
+		quadheight = rowheight / 4;
 	}
 
-	function drawBase()
+	function init()
 	{
-		// Drawing full opaque:
-		ctx.globalAlpha = 1.;
-		// Hour rows:
-		ctx.strokeStyle = "#333333";
-		let rowstart = {
-			x: 0,
-			y: 0
-		};
-		// We only need to draw every second row:
-		for (let i = 0; i < 12; i++)
+		if (!constructed)
 		{
-			ctx.strokeRect(rowstart.x, rowstart.y, rowwidth, rowheight);
-			rowstart.y += row2height;
+			construct();
 		}
-		// Day columns:
-		ctx.strokeStyle = "#000000";
-		let colstart = {
-			x: 0,
-			y: 0
-		};
-		for (let i = 0; i < 7; i++)
-		{
-			ctx.strokeRect(colstart.x, colstart.y, colwidth, colheight);
-			colstart.x += colwidth;
-		}
-	}
-
-	function drawBaseNew() {
-		// Drawing full opaque:
-		ctx.globalAlpha = 1.;
-		// Hour rows:
-		ctx.beginPath();
-		for (let i = 1; i < 24; i++) {
-			let rowx = i * rowheight;
-			ctx.moveTo(0, rowx);
-			ctx.lineTo(canvas.width, rowx);
-		}
-		ctx.strokeStyle = "#333333";
-		ctx.stroke();
-		ctx.closePath();
-		// Day columns:
-		ctx.beginPath();
-		for (let i = 1; i < 7; i++) {
-			let coly = i * colwidth;
-			ctx.moveTo(coly, 0);
-			ctx.lineTo(coly, canvas.height);
-		}
-		ctx.strokeStyle = "#000000";
-		ctx.stroke();
-		ctx.closePath();
-	}
-
-	function drawSelection(selection)
-	{
-		// TODO: set alpha and colors
-		ctx.fillRect(selection.start.x * colwidth, selection.start.y * quadheight, selection.end.x * colwidth, selection.end.y * quadheight);
+		redraw();
 	}
 
 	function redraw()
 	{
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		drawBaseNew();
+		ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
+		drawBase();
 		for (let selection of selections)
 		{
 			if (selection)
@@ -155,32 +162,106 @@
 			}
 		}
 	}
+
+	function reset()
+	{
+		selections = [];
+		active_selection = undefined;
+		elements.stringfield.textContent = "";
+		redraw();
+	}
+
+	function set24()
+	{
+		reset();
+		selections[0] = {
+			start: {
+				x: 0,
+				y: 0
+			},
+			end: {
+				x: 6, // Sunday
+				y: 96 // 24 * 4, last quadrant of last hour
+			}
+		};
+		redraw();
+		updateTheString();
+	}
+
+	function drawBase()
+	{
+		/*
+		 * The authors of the Canvas2DContext API carefully analysed all the different coordinate systems and drawing conventions and masterfully chose the worst one for the job.
+		 * Coordinates describe lines in-between pixels. All drawings are positioned by the coordinates. Therefore a 1px black vertical line at x 50 draws a 2px blurry grey line at 49th and 50th vertical pixel lines. Yes, really. They could've, of course, also made 0,0 be at offset 7 from the bottom-right corner, but I assume that the only reason they chose a somewhat saner approach is that if they didn't, people would realise it's intentional.
+		 * As a result of such glorious design worthy of the 21st century, all coordinates are offset by 0.5. Don't worry, it makes my eyes bleed too.
+		 */
+		// Drawing full opaque:
+		ctx.globalAlpha = 1.;
+		// Hour rows:
+		ctx.beginPath();
+		for (let i = 1; i < 24; i++) // Starting from 1 and ending before 24 because we're skipping the edge lines, table border does them for us.
+		{
+			let rowx = i * rowheight + i + 0.5; // The line is drawn in the middle of the next border line (previous rows * rowheight + previous borders * 1px + 0.5)
+			ctx.moveTo(0, rowx);
+			ctx.lineTo(elements.canvas.width, rowx);
+		}
+		ctx.strokeStyle = "black";
+		ctx.stroke();
+		ctx.closePath();
+		// Day columns:
+		ctx.beginPath();
+		for (let i = 1; i < 7; i++)
+		{
+			let coly = i * colwidth + i + 0.5;
+			ctx.moveTo(coly, 0);
+			ctx.lineTo(coly, elements.canvas.height);
+		}
+		ctx.strokeStyle = "black";
+		ctx.stroke();
+		ctx.closePath();
+	}
+
+	function drawSelection(selection)
+	{
+		let startx = selection.start.x * (colwidth + 1),
+			starty = selection.start.y * (quadheight + 1),
+			endx = (selection.end.x + 1) * (colwidth + 1),
+			endy = (selection.end.y - 1) * (quadheight + 1);
+
+		// TODO: fancy shit
+		ctx.save(); // Put current context state on stack
+		ctx.globalAlpha = .5; // Half-opaque
+		ctx.fillStyle = "blue";
+		ctx.beginPath();
+		ctx.moveTo(startx, starty);
+		ctx.lineTo(endx, starty); // →
+		ctx.lineTo(endx, endy); // ↓
+		ctx.lineTo(startx, endy); // ←
+		ctx.lineTo(startx, starty); // ↑
+		ctx.fill();
+		ctx.restore(); // Restore saved state, popping it from the stack
+	}
+
 	// Calculates column x (day)quarter table coordinates, used to draw the selection rectangle. The third argument determines if we want to calculate including the rectangle the coordinates are in.
-	function calcTableCoordinates(x, y, including)
+	function calcTableCoordinates(x, y)
 	{
 		if (isNaN(x) || isNaN(y))
 		{
 			throw {
-				name: "ReferenceError",
+				name: "TypeError",
 				message: "calcTableCoordinates called with NaN argument(s)"
 			};
 		}
 		console.log("calcTableCoordinates raw: " + x + ", " + y);
-		if (including) {
-			x = Math.ceil(x / colwidth);
-			y = Math.ceil(y / quadheight);
-		}
-		else {
-			x = Math.floor(x / colwidth);
-			y = Math.floor(y / quadheight);
-		}
-		console.log("calcTableCoordinates result: " + x + ", " + y + " (" + y / 4 + ")");
+		x = Math.floor(x / (colwidth + 1));
+		y = Math.floor(y / (quadheight + 1));
+		console.log("calcTableCoordinates result: " + x + ", " + y);
 		return {
 			x,
 			y
 		};
 	}
-	// Calculates day, hour, minutes objects, used to construct the opening hours string. Takes in table coordinates.
+	// Calculates {day, hour, minutes} objects, used to construct the opening hours string. Takes in table coordinates.
 	function calcDayHour(coords)
 	{
 		let
@@ -240,11 +321,11 @@
 			{
 				return "24/7";
 			}
-			// We need two-digit minute codes, so if the minutes are zero change them to "00" string.
-			sdayhour.minutes = sdayhour.minutes ? sdayhour.minutes : "00";
-			edayhour.minutes = edayhour.minutes ? edayhour.minutes : "00";
-			sdayhour.hour = (sdayhour.hour < 10)? "0" + sdayhour.hour : sdayhour.hour;
-			edayhour.hour = (edayhour.hour < 10)? "0" + edayhour.hour : edayhour.hour;
+			// We need two-digit minute codes, pad everything with zeroes
+			sdayhour.minutes = String(sdayhour.minutes).padStart(2, "0");
+			edayhour.minutes = String(edayhour.minutes).padStart(2, "0");
+			sdayhour.hour = String(sdayhour.hour).padStart(2, "0");
+			edayhour.hour = String(edayhour.hour).padStart(2, "0");
 			thestring += days[sdayhour.day].code;
 			if (sdayhour.day != edayhour.day)
 			{
@@ -259,14 +340,14 @@
 	{
 		let temp = content ? content : generateTheString();
 		console.log(temp);
-		stringfield.textContent = temp;
+		elements.stringfield.textContent = temp;
 	}
 
 	function pointerDown(ev)
 	{
 		if (!ev.isPrimary)
 		{
-			console.log("Pointer not primary!");
+			console.log("Pointer not primary!"); // TEMP, will quit silently at release.
 			return true;
 		}
 		ev.preventDefault();
@@ -276,7 +357,8 @@
 		{
 			selections[active_selection] = undefined;
 		}
-		else {
+		else
+		{
 			selections[active_selection] = {
 				start:
 				{
@@ -285,13 +367,13 @@
 				},
 				end:
 				{
-					x: coords.x,
-					y: coords.y
+					x: coords.x + 1,
+					y: coords.y + 1
 				}
 			};
 			ev.target.addEventListener("pointermove", pointerMove,
 			{
-				passive: true
+				passive: false
 			});
 			window.addEventListener("pointerup", pointerUp,
 			{
@@ -306,7 +388,8 @@
 		{
 			return true;
 		}
-		let coords = calcTableCoordinates(ev.offsetX, ev.offsetY);
+		ev.preventDefault();
+		let coords = calcTableCoordinates(ev.offsetX, ev.offsetY, false);
 		selections[active_selection].end = {
 			x: coords.x,
 			y: coords.y

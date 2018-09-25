@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<!-- Yeah, yeah, inline CSS stylesheet. I'm not gonna import a third, synchronously loaded, file for a tiny webapp embedded in a much bigger one. -->
+	<style type="text/css">
+	.dxts *{
+		padding: 0;
+		margin: 0;
+		text-align: center;
+	}
+	.dxts table {
+		width: fit-content;
+		height: fit-content;
+		margin: 0.5em;
+		border-collapse: collapse;
+	}
+	.dxts table, th, td {
+		border: 1px solid black;
+	}
+	.dxts-daylabel {
+		width: 8ch;
+		max-width: 8ch;
+		height: fit-content;
+		padding: 0.5em 1em;
+		overflow: hidden;
+	}
+	.dxts-hourlabel {
+		font-size: 80%;
+		width: -moz-fit-content;
+		width: fit-content;
+		height: -moz-fit-content;
+		height: fit-content;
+		padding: 0.25em 0.5em;
+	}
+	.dxts canvas {
+		display: flex;
+		width: 100%;
+		height: 48em /* Fuck you CSS, fuck you. */;
+	}
+	</style>
+	<!-- This is the main script: -->
+	<script async defer type="text/javascript" src="dxts.js"></script>
+</head>
+<body>
+	<!-- Everything is constructed dynamically. Final product will be a js module with no additional file dependencies, including this HTML. -->
+	<p>
+		Proof of concept. Slight inaccuracies will be corrected and overall look will be improved.
+	</p>
+</body>
+</html>
