@@ -228,7 +228,7 @@
 			endx = (selection.end.x + 1) * (colwidth + 1),
 			endy = (selection.end.y - 1) * (quadheight + 1);
 
-		// TODO: fancy shit
+		// TODO: fancy stuff
 		ctx.save(); // Put current context state on stack
 		ctx.globalAlpha = .5; // Half-opaque
 		ctx.fillStyle = "blue";
@@ -262,13 +262,8 @@
 		};
 	}
 	// Calculates {day, hour, minutes} objects, used to construct the opening hours string. Takes in table coordinates.
-	function calcDayHour(coords)
+	function calcDayHour({x, y})
 	{
-		let
-		{
-			x,
-			y
-		} = coords;
 		let day = x;
 		let hour = Math.floor(y / 4);
 		let quarter = y % 4;
