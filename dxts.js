@@ -134,10 +134,11 @@
 		let canvas = elements.canvas;
 		canvas.width = canvas.clientWidth;
 		canvas.height = canvas.clientHeight;
-		colwidth = elements.day_labels[0].clientWidth;
+		// clientWidth doesn't count the border, gotta add its 1 pixel. Not detecting from .style because it's more trouble (different units etc) than it's worth.
+		colwidth = elements.day_labels[0].clientWidth + 1;
 		colheight = canvas.height;
 		rowwidth = canvas.width;
-		rowheight = elements.hour_labels[0].clientHeight;
+		rowheight = elements.hour_labels[0].clientHeight + 1;
 		quadheight = rowheight / 4;
 	}
 
@@ -201,7 +202,7 @@
 		ctx.beginPath();
 		for (let i = 1; i < 24; i++) // Starting from 1 and ending before 24 because we're skipping the edge lines, table border does them for us.
 		{
-			let rowx = i * rowheight + i - 0.5; // The line is drawn in the middle of the next border line (previous rows * rowheight + previous borders * 1px - 0.5)
+			let rowx = i * rowheight - 0.5; // The line is drawn in the middle of the next border line
 			ctx.moveTo(0, rowx);
 			ctx.lineTo(elements.canvas.width, rowx);
 		}
@@ -212,7 +213,7 @@
 		ctx.beginPath();
 		for (let i = 1; i < 7; i++)
 		{
-			let coly = i * colwidth + i - 0.5;
+			let coly = i * colwidth - 0.5;
 			ctx.moveTo(coly, 0);
 			ctx.lineTo(coly, elements.canvas.height);
 		}
@@ -223,10 +224,10 @@
 
 	function drawSelection(selection)
 	{
-		let startx = selection.start.x * (colwidth + 1),
-			starty = selection.start.y * (quadheight + 1),
-			endx = (selection.end.x + 1) * (colwidth + 1),
-			endy = (selection.end.y - 1) * (quadheight + 1);
+		let startx = selection.start.x * colwidth,
+			starty = selection.start.y * quadheight,
+			endx = (selection.end.x + 1) * colwidth,
+			endy = (selection.end.y + 1) * quadheight;
 
 		// TODO: fancy stuff
 		ctx.save(); // Put current context state on stack
@@ -242,7 +243,7 @@
 		ctx.restore(); // Restore saved state, popping it from the stack
 	}
 
-	// Calculates column x (day)quarter table coordinates, used to draw the selection rectangle. The third argument determines if we want to calculate including the rectangle the coordinates are in.
+	// Calculates column x (day)quarter table coordinates, used to draw the selection rectangle.
 	function calcTableCoordinates(x, y)
 	{
 		if (isNaN(x) || isNaN(y))
@@ -253,8 +254,8 @@
 			};
 		}
 		console.log("calcTableCoordinates raw: " + x + ", " + y);
-		x = Math.floor(x / (colwidth + 1));
-		y = Math.floor(y / (quadheight + 1));
+		x = Math.floor(x / colwidth);
+		y = Math.floor(y / quadheight);
 		console.log("calcTableCoordinates result: " + x + ", " + y);
 		return {
 			x,
