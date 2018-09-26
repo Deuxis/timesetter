@@ -201,7 +201,7 @@
 		ctx.beginPath();
 		for (let i = 1; i < 24; i++) // Starting from 1 and ending before 24 because we're skipping the edge lines, table border does them for us.
 		{
-			let rowx = i * rowheight + i + 0.5; // The line is drawn in the middle of the next border line (previous rows * rowheight + previous borders * 1px + 0.5)
+			let rowx = i * rowheight + i - 0.5; // The line is drawn in the middle of the next border line (previous rows * rowheight + previous borders * 1px - 0.5)
 			ctx.moveTo(0, rowx);
 			ctx.lineTo(elements.canvas.width, rowx);
 		}
@@ -212,7 +212,7 @@
 		ctx.beginPath();
 		for (let i = 1; i < 7; i++)
 		{
-			let coly = i * colwidth + i + 0.5;
+			let coly = i * colwidth + i - 0.5;
 			ctx.moveTo(coly, 0);
 			ctx.lineTo(coly, elements.canvas.height);
 		}
