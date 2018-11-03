@@ -129,6 +129,7 @@ DXTS = (function()
 		constructed = true;
 		elements.root.appendChild(domfragment);
 		resize();
+		setTimeout(resize, 1000);
 	}
 
 	function resize()
@@ -146,6 +147,7 @@ DXTS = (function()
 		console.log("rowheight: " + rowheight);
 		quadheight = rowheight / 4;
 		console.log("quadheight: " + quadheight);
+		redraw();
 	}
 
 	function init()
