@@ -227,7 +227,7 @@
 		let startx = selection.start.x * colwidth,
 			starty = selection.start.y * quadheight,
 			endx = (selection.end.x + 1) * colwidth,
-			endy = (selection.end.y + 1) * quadheight;
+			endy = (selection.end.y) * quadheight;
 
 		// TODO: fancy stuff
 		ctx.save(); // Put current context state on stack
@@ -309,7 +309,6 @@
 			{
 				thestring += "; ";
 			}
-			selection.end.y++;
 			let sdayhour = calcDayHour(selection.start),
 				edayhour = calcDayHour(selection.end);
 			//console.dir(sdayhour);
@@ -364,7 +363,7 @@
 				end:
 				{
 					x: coords.x,
-					y: coords.y
+					y: coords.y + 1
 				}
 			};
 			ev.target.addEventListener("pointermove", pointerMove,
@@ -389,7 +388,7 @@
 		let coords = calcTableCoordinates(ev.offsetX, ev.offsetY);
 		selections[active_selection].end = {
 			x: coords.x,
-			y: coords.y
+			y: coords.y + 1
 		};
 		redraw();
 	}
