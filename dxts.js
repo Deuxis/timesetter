@@ -267,24 +267,26 @@
 	{
 		let day = x;
 		let hour = Math.floor(y / 4);
+		console.log("hour: " + hour);
 		let quarter = y % 4;
+		console.log("quarter: " + quarter);
 		let minutes;
-		if (quarter < .25)
+		switch (quarter)
 		{
-			minutes = 0;
+			case 0:
+				minutes = 0;
+				break;
+			case 1:
+				minutes = 15;
+				break;
+			case 2:
+				minutes = 30;
+				break;
+			case 3:
+				minutes = 45;
+				break;
 		}
-		else if (quarter < .50)
-		{
-			minutes = 15;
-		}
-		else if (quarter < .75)
-		{
-			minutes = 30;
-		}
-		else
-		{
-			minutes = 45;
-		}
+
 		return {
 			day,
 			hour,
