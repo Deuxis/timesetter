@@ -134,17 +134,18 @@ DXTS = (function()
 	function resize()
 	{
 		let canvas = elements.canvas;
-		// Deduce the label dimensions, resize the canvas to fit with them.
-		colwidth = elements.day_labels[0].clientWidth + 1; // Adding a pixel because clientWidth doesn't count the 1px border
-		console.log("colwidth: " + colwidth);
-		canvas.width = colwidth * 7 - 1; // Removing one pixel because only the 6 borders between labels are of any interest to us
+		let cellbox = canvas.parentNode.getBoundingClientRect();
+		console.dir(cellbox);
+		canvas.width = cellbox.width;
+		colwidth = cellbox.width / 7;
 		console.log("canvas.width: " + canvas.width);
-		console.dir(elements.hour_labels[0].getBoundingClientRect());
-		rowheight = elements.hour_labels[0].getBoundingClientRect().height + 1;
-		console.log("rowheight: " + rowheight);
-		canvas.height = rowheight * 24 - 1;
+		console.log("colwidth: " + colwidth);
+		canvas.height = cellbox.height;
+		rowheight = cellbox.height / 24;
 		console.log("canvas.height: " + canvas.height);
+		console.log("rowheight: " + rowheight);
 		quadheight = rowheight / 4;
+		console.log("quadheight: " + quadheight);
 	}
 
 	function init()
