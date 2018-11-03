@@ -253,10 +253,10 @@
 				message: "calcTableCoordinates called with NaN argument(s)"
 			};
 		}
-		console.log("calcTableCoordinates raw: " + x + ", " + y);
+		//console.log("calcTableCoordinates raw: " + x + ", " + y);
 		x = Math.floor(x / colwidth);
 		y = Math.floor(y / quadheight);
-		console.log("calcTableCoordinates result: " + x + ", " + y);
+		//console.log("calcTableCoordinates result: " + x + ", " + y);
 		return {
 			x,
 			y
@@ -309,6 +309,7 @@
 			{
 				thestring += "; ";
 			}
+			selection.end.y++;
 			let sdayhour = calcDayHour(selection.start),
 				edayhour = calcDayHour(selection.end);
 			//console.dir(sdayhour);
@@ -335,7 +336,7 @@
 	function updateTheString(content)
 	{
 		let temp = content ? content : generateTheString();
-		console.log(temp);
+		//console.log(temp);
 		elements.stringfield.textContent = temp;
 	}
 
@@ -343,7 +344,6 @@
 	{
 		if (!ev.isPrimary)
 		{
-			console.log("Pointer not primary!"); // TEMP, will quit silently at release.
 			return true;
 		}
 		ev.preventDefault();
@@ -363,8 +363,8 @@
 				},
 				end:
 				{
-					x: coords.x + 1,
-					y: coords.y + 1
+					x: coords.x,
+					y: coords.y
 				}
 			};
 			ev.target.addEventListener("pointermove", pointerMove,
@@ -376,6 +376,7 @@
 				passive: true
 			});
 		}
+		redraw();
 	}
 
 	function pointerMove(ev)
