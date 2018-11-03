@@ -267,9 +267,7 @@
 	{
 		let day = x;
 		let hour = Math.floor(y / 4);
-		console.log("hour: " + hour);
 		let quarter = y % 4;
-		console.log("quarter: " + quarter);
 		let minutes;
 		switch (quarter)
 		{
