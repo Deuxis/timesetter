@@ -140,6 +140,7 @@
 		rowwidth = canvas.width;
 		rowheight = elements.hour_labels[0].clientHeight + 1;
 		quadheight = rowheight / 4;
+		redraw();
 	}
 
 	function init()
