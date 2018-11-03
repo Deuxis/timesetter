@@ -235,7 +235,7 @@ DXTS = (function()
 		let startx = selection.start.x * colwidth,
 			starty = selection.start.y * quadheight,
 			endx = (selection.end.x + 1) * colwidth,
-			endy = (selection.end.y + 1) * quadheight;
+			endy = (selection.end.y) * quadheight;
 
 		// TODO: fancy stuff
 		ctx.save(); // Put current context state on stack
@@ -251,7 +251,7 @@ DXTS = (function()
 		ctx.restore(); // Restore saved state, popping it from the stack
 	}
 
-	// Calculates column x (day)quarter table coordinates, used to draw the selection rectangle.
+	// Calculates column x quarter table coordinates, used to draw the selection rectangle.
 	function calcTableCoordinates(x, y)
 	{
 		if (isNaN(x) || isNaN(y))
@@ -261,10 +261,8 @@ DXTS = (function()
 				message: "calcTableCoordinates called with NaN argument(s)"
 			};
 		}
-		//console.log("calcTableCoordinates raw: " + x + ", " + y);
 		x = Math.floor(x / colwidth);
 		y = Math.floor(y / quadheight);
-		//console.log("calcTableCoordinates result: " + x + ", " + y);
 		return {
 			x,
 			y
@@ -277,22 +275,22 @@ DXTS = (function()
 		let hour = Math.floor(y / 4);
 		let quarter = y % 4;
 		let minutes;
-		if (quarter < .25)
+		switch (quarter)
 		{
-			minutes = 0;
+			case 0:
+				minutes = 0;
+				break;
+			case 1:
+				minutes = 15;
+				break;
+			case 2:
+				minutes = 30;
+				break;
+			case 3:
+				minutes = 45;
+				break;
 		}
-		else if (quarter < .50)
-		{
-			minutes = 15;
-		}
-		else if (quarter < .75)
-		{
-			minutes = 30;
-		}
-		else
-		{
-			minutes = 45;
-		}
+
 		return {
 			day,
 			hour,
@@ -317,16 +315,13 @@ DXTS = (function()
 			{
 				thestring += "; ";
 			}
-			selection.end.y++;
 			let sdayhour = calcDayHour(selection.start),
 				edayhour = calcDayHour(selection.end);
-			//console.dir(sdayhour);
-			//console.dir(edayhour);
 			if (sdayhour.day === 0 && sdayhour.hour === 0 && sdayhour.minutes === 0 && edayhour.day == 6 && edayhour.hour == 24)
 			{
 				return "24/7";
 			}
-			// We need two-digit minute codes, pad everything with zeroes
+			// We need two-digit hour and minute codes, pad everything with zeroes
 			sdayhour.minutes = String(sdayhour.minutes).padStart(2, "0");
 			edayhour.minutes = String(edayhour.minutes).padStart(2, "0");
 			sdayhour.hour = String(sdayhour.hour).padStart(2, "0");
@@ -344,7 +339,6 @@ DXTS = (function()
 	function updateTheString(content)
 	{
 		let temp = content ? content : generateTheString();
-		//console.log(temp);
 		elements.stringfield.textContent = temp;
 	}
 
@@ -372,7 +366,7 @@ DXTS = (function()
 				end:
 				{
 					x: coords.x,
-					y: coords.y
+					y: coords.y + 1
 				}
 			};
 			ev.target.addEventListener("pointermove", pointerMove,
@@ -394,10 +388,10 @@ DXTS = (function()
 			return true;
 		}
 		ev.preventDefault();
-		let coords = calcTableCoordinates(ev.offsetX, ev.offsetY, false);
+		let coords = calcTableCoordinates(ev.offsetX, ev.offsetY);
 		selections[active_selection].end = {
 			x: coords.x,
-			y: coords.y
+			y: coords.y + 1
 		};
 		redraw();
 	}
