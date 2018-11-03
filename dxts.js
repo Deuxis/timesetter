@@ -1,4 +1,4 @@
-(function()
+DXTS = (function()
 {
 	"use strict";
 	// TODO: Translations
@@ -31,7 +31,7 @@
 		code: "Su",
 		enname: "Sunday"
 	}];
-	let constructed, ctx, colwidth, colheight, rowwidth, rowheight, quadheight;
+	let constructed, ctx, colwidth, rowheight, quadheight;
 	let selections = [],
 		active_selection;
 
@@ -98,12 +98,14 @@
 		}
 		for (var i = 0; i < 24; i++)
 		{
-			// We want strings like 01:00-02:00
-			let string = String(i).padStart(2, "0") + ":00-" + String(i + 1).padStart(2, "0") + ":00";
+			// We want beginning-of-hour strings like 01:00
+			let string = String(i).padStart(2, "0") + ":00";
 			let row = tbody.insertRow();
 			elements.hour_labels[i] = row.insertCell();
 			elements.hour_labels[i].classList.add("dxts-hourlabel");
-			elements.hour_labels[i].appendChild(document.createTextNode(string));
+			let span = document.createElement("span");
+			span.appendChild(document.createTextNode(string));
+			elements.hour_labels[i].appendChild(span);
 		}
 		// All labels set up, table of correct size. Now create and insert the canvas (into the first non-label row).
 		elements.canvas = document.createElement("canvas");
@@ -132,13 +134,16 @@
 	function resize()
 	{
 		let canvas = elements.canvas;
-		canvas.width = canvas.clientWidth;
-		canvas.height = canvas.clientHeight;
-		// clientWidth doesn't count the border, gotta add its 1 pixel. Not detecting from .style because it's more trouble (different units etc) than it's worth.
-		colwidth = elements.day_labels[0].clientWidth + 1;
-		colheight = canvas.height;
-		rowwidth = canvas.width;
-		rowheight = elements.hour_labels[0].clientHeight + 1;
+		// Deduce the label dimensions, resize the canvas to fit with them.
+		colwidth = elements.day_labels[0].clientWidth + 1; // Adding a pixel because clientWidth doesn't count the 1px border
+		console.log("colwidth: " + colwidth);
+		canvas.width = colwidth * 7 - 1; // Removing one pixel because only the 6 borders between labels are of any interest to us
+		console.log("canvas.width: " + canvas.width);
+		console.dir(elements.hour_labels[0].getBoundingClientRect());
+		rowheight = elements.hour_labels[0].getBoundingClientRect().height + 1;
+		console.log("rowheight: " + rowheight);
+		canvas.height = rowheight * 24 - 1;
+		console.log("canvas.height: " + canvas.height);
 		quadheight = rowheight / 4;
 	}
 

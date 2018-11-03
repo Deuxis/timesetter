@@ -10,33 +10,46 @@
 		text-align: center;
 	}
 	.dxts table {
-		width: fit-content;
-		height: fit-content;
-		margin: 0.5em;
-		border-collapse: collapse;
-	}
-	.dxts table, th, td {
-		border: 1px solid black;
-	}
-	.dxts-daylabel {
-		width: 8ch;
-		max-width: 8ch;
-		height: fit-content;
-		padding: 0.5em 1em;
-		overflow: hidden;
-	}
-	.dxts-hourlabel {
-		font-size: 80%;
 		width: -moz-fit-content;
 		width: fit-content;
 		height: -moz-fit-content;
 		height: fit-content;
+		border: 1px solid black;
+		border-collapse: collapse;
+		background-color: white;
+	}
+	.dxts table * {
+		background-color: inherit;
+	}
+	.dxts-daylabel {
+		width: 8ch;
+		max-width: 8ch;
+		height: -moz-fit-content;
+		height: fit-content;
+		padding: 0.5em 1em;
+		overflow: hidden;
+		border: 1px solid black;
+		border-left: none;
+	}
+	.dxts-hourlabel {
+		width: -moz-fit-content;
+		width: fit-content;
+		height: -moz-min-content;
+		height: min-content;
 		padding: 0.25em 0.5em;
+		border: 1px solid black;
+	}
+	.dxts-hourlabel span {
+		display: inline-block;
+		height: 1em;
+		transform: translateY(-0.9em);
+		overflow: hidden;
 	}
 	.dxts canvas {
-		display: flex;
-		width: 100%;
-		height: 48em /* Fuck you CSS, fuck you. */;
+		width: -moz-fit-content;
+		width: fit-content;
+		height: -moz-fit-content;
+		height: fit-content;
 	}
 	</style>
 	<!-- This is the main script: -->
