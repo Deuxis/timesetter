@@ -243,7 +243,7 @@
 		ctx.restore(); // Restore saved state, popping it from the stack
 	}
 
-	// Calculates column x (day)quarter table coordinates, used to draw the selection rectangle.
+	// Calculates column x quarter table coordinates, used to draw the selection rectangle.
 	function calcTableCoordinates(x, y)
 	{
 		if (isNaN(x) || isNaN(y))
@@ -253,10 +253,8 @@
 				message: "calcTableCoordinates called with NaN argument(s)"
 			};
 		}
-		//console.log("calcTableCoordinates raw: " + x + ", " + y);
 		x = Math.floor(x / colwidth);
 		y = Math.floor(y / quadheight);
-		//console.log("calcTableCoordinates result: " + x + ", " + y);
 		return {
 			x,
 			y
@@ -311,13 +309,11 @@
 			}
 			let sdayhour = calcDayHour(selection.start),
 				edayhour = calcDayHour(selection.end);
-			//console.dir(sdayhour);
-			//console.dir(edayhour);
 			if (sdayhour.day === 0 && sdayhour.hour === 0 && sdayhour.minutes === 0 && edayhour.day == 6 && edayhour.hour == 24)
 			{
 				return "24/7";
 			}
-			// We need two-digit minute codes, pad everything with zeroes
+			// We need two-digit hour and minute codes, pad everything with zeroes
 			sdayhour.minutes = String(sdayhour.minutes).padStart(2, "0");
 			edayhour.minutes = String(edayhour.minutes).padStart(2, "0");
 			sdayhour.hour = String(sdayhour.hour).padStart(2, "0");
@@ -335,7 +331,6 @@
 	function updateTheString(content)
 	{
 		let temp = content ? content : generateTheString();
-		//console.log(temp);
 		elements.stringfield.textContent = temp;
 	}
 
